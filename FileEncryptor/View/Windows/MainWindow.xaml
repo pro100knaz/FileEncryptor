@@ -8,7 +8,7 @@
         xmlns:vm="clr-namespace:FileEncryptor.ViewModel"
         DataContext="{Binding MainWindowModel , Source= {StaticResource Locator}}"
         Title="{Binding Title}" Height="450" Width="800">
-    <DockPanel LastChildFill="True">
+    <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="Файл">
                 <MenuItem Header="Выход" Command="{StaticResource CloseWindowCommand}"/>
@@ -35,6 +35,58 @@
             </TabItem>
         </TabControl>
 
-        <Grid/>
+        <Grid Margin="3">
+
+            <Grid.Resources>
+                <Style TargetType="TextBlock">
+                    <Style.Triggers>
+                        <Trigger Property="Grid.Column" Value="0">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Margin" Value="0,0,3,0"></Setter>
+
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+
+                <Style TargetType="TextBox">
+                    <Style.Triggers>
+                        <Trigger Property="Grid.Column" Value="0">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Margin" Value="4"></Setter>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Resources>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+
+
+            <TextBlock Grid.Column="0" Grid.Row="0" Text="Пароль:"></TextBlock>
+            <TextBox Grid.Column="1" Grid.Row="0" Text="123"></TextBox> 
+            
+            
+            <TextBlock Grid.Column="0" Grid.Row="1" Text="Файл:"></TextBlock>
+            <DockPanel Grid.Column="1" Grid.Row="1">
+                <Button Content="Выбор" DockPanel.Dock="Right" Padding="10,0" />
+                <TextBox IsReadOnly="True" BorderThickness="0" Text="344"/>
+            </DockPanel>
+
+        </Grid>
     </DockPanel>
 </Window>
