@@ -78,14 +78,30 @@
 
 
             <TextBlock Grid.Column="0" Grid.Row="0" Text="Пароль:"></TextBlock>
-            <TextBox Grid.Column="1" Grid.Row="0" Text="123"></TextBox> 
+            <TextBox 
+                Margin="5"
+                Grid.Column="1" Grid.Row="0" Text="123" 
+                BorderThickness="0"></TextBox> 
             
             
             <TextBlock Grid.Column="0" Grid.Row="1" Text="Файл:"></TextBlock>
             <DockPanel Grid.Column="1" Grid.Row="1">
-                <Button Content="Выбор" DockPanel.Dock="Right" Padding="10,0" />
-                <TextBox IsReadOnly="True" BorderThickness="0" Text="344"/>
+                <Button Content="Выбор" 
+                        Padding="10,0" 
+                        DockPanel.Dock="Right"
+                        Command="{Binding SelectFileCommand}"/>
+                <TextBox IsReadOnly="True" BorderThickness="0"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Stretch"
+                         Text="{Binding SelectedFile.Name, Mode=OneWay}" 
+                         ToolTip="{Binding SelectedFile.FullName}"/>
             </DockPanel>
+
+            <TextBlock  Grid.Column="0" Grid.Row="2" Text="Размер"/>
+            <TextBox Grid.Column="1" Grid.Row="2" 
+                     BorderThickness="0"
+                     IsReadOnly="True" Text="{Binding SelectedFile.Length, Mode=OneWay}" 
+                     Margin="5"/>
 
         </Grid>
     </DockPanel>
