@@ -13,10 +13,13 @@ namespace FileEncryptor.ViewModel
     internal class MainWindowViewModel : ViewModel
     {
         private readonly IUserDialog _UserDialog;
+        private readonly IEncryptor _Encryptor;
+
+        private const string __EncryptedFileSuffix = ".encrypted";
 
         #region Properties
 
-        
+
         #region string Title - "MainwINDOW tITLE"
 
         ///<summary> MainwINDOW tITLE </summary>
@@ -94,8 +97,6 @@ namespace FileEncryptor.ViewModel
         #endregion
 
         #region Command EncryptCommand - Зашифровать Данные
-
-
         ///<summary> Зашифровать Данные </summary>
         private ICommand _EncryptCommand;
 
@@ -111,6 +112,12 @@ namespace FileEncryptor.ViewModel
         {
             var file = p as FileInfo ?? SelectedFile;
             if (file == null) return;
+
+
+            var default_file_name = file.FullName + __EncryptedFileSuffix;
+            if (!_UserDialog.SafeFile("Выбор файл для сохранения", out var destination_path, default_file_name)) return;
+
+
         }
 
         #endregion
@@ -136,15 +143,23 @@ namespace FileEncryptor.ViewModel
         private void OnDecryptCommandExecuted(object p)
         {
             if (!(p is FileInfo file)) return;
+
+
+            var default_file_name = file.FullName.EndsWith(__EncryptedFileSuffix)
+                ? file.FullName.Substring(0, file.FullName.Length - __EncryptedFileSuffix.Length)
+                : file.FullName;
+            if (!_UserDialog.SafeFile("Выбор файл для сохранения", out var destination_path, default_file_name)) return;
+
         }
 
         #endregion
 
 
         #endregion
-        public MainWindowViewModel(IUserDialog userDialog)
+        public MainWindowViewModel(IUserDialog userDialog, IEncryptor encryptor)
         {
             _UserDialog = userDialog;
+            _Encryptor = encryptor;
         }
     }
 }

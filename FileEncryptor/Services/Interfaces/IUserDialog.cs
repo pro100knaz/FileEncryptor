@@ -11,5 +11,6 @@ namespace FileEncryptor.Services.Interfaces
         bool OpenFile(string Title, out string SelectedFile, string Filter = "Вск файлы (*.*)|*.*");
         bool OpenFiles(string Title, out IEnumerable<string> SelectedFiles, string Filter = "Вск файлы (*.*)|*.*");
 
+        bool SafeFile(string Title, out IEnumerable<string> SelectedFiles, string DefaultFileName = null, string Filter = "Вск файлы (*.*)|*.*");
     }
 }

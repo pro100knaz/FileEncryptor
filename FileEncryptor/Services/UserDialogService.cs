@@ -50,5 +50,27 @@ namespace FileEncryptor.Services
             return true;
 
         }
+
+        public bool SafeFile(string Title, out string SelectedFile, string DefaultFileName = null, string Filter = "Вск файлы (*.*)|*.*")
+        {
+            var file_dialog = new SaveFileDialog()
+            {
+                Title = Title,
+                Filter = Filter
+            };
+            if(!string.IsNullOrWhiteSpace(DefaultFileName))
+                file_dialog.FileName = DefaultFileName;
+
+
+            if (file_dialog.ShowDialog() != true)
+            {
+                SelectedFile = null;
+                return false;
+            }
+
+            SelectedFile = file_dialog.FileName;
+
+            return true;
+        }
     }
 }
