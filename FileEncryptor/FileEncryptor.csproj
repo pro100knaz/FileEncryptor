@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+	  <StartupObject>FileEncryptor</StartupObject>
   </PropertyGroup>
 
 
@@ -22,6 +23,7 @@
     <Folder Include="Infrastructure\Behaviors\" />
     <Folder Include="Model\" />
     <Folder Include="Resources\" />
+    <Folder Include="Data\" />
   </ItemGroup>
 
 </Project>

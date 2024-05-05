@@ -18,29 +18,27 @@ namespace FileEncryptor
             app.Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .UseContentRoot(App.CurrentDirectory)
-                .ConfigureAppConfiguration((host, cfg) => cfg
-                    .SetBasePath(App.CurrentDirectory)
-                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true))
-                .ConfigureServices(App.ConfigureServices);
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            var host_builder = Host.CreateDefaultBuilder(args);
+            //host_builder.UseContentRoot(App.CurrentDirectory);
+            //host_builder.ConfigureAppConfiguration((host, cfg) =>
+            //{
+            //    cfg.SetBasePath(App.CurrentDirectory);
+            //    cfg.AddJsonFile("appsettings.json", optional: true,
+            //        reloadOnChange: true);
+            //});
+            host_builder.ConfigureServices(App.ConfigureServices);
 
-        //public static IHostBuilder CreateHostBuilder(string[] args)
-        //{
-        //    var host_builder = Host.CreateDefaultBuilder(args);
-
-        //    host_builder.UseContentRoot(App.CurrentDirectory);
-        //    host_builder.ConfigureAppConfiguration((host, cfg) =>
-        //    {
-        //        cfg.SetBasePath(App.CurrentDirectory);
-        //        cfg.AddJsonFile("appsettings.json", optional: true,
-        //            reloadOnChange: true);
-        //    });
-
-        //    host_builder.ConfigureServices(App.ConfigureServices);
-
-        //    return host_builder;
-        //}
+            return host_builder;
+        }
     }
 }
+
+        //public static IHostBuilder CreateHostBuilder(string[] args) =>
+        //    Host.CreateDefaultBuilder(args)
+        //            .UseContentRoot(App.CurrentDirectory)
+        //            .ConfigureAppConfiguration((host, cfg) => cfg
+        //                .SetBasePath(App.CurrentDirectory)
+        //            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true))
+        //        .ConfigureServices(App.ConfigureServices);
