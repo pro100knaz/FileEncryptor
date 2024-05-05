@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -88,7 +89,7 @@ namespace FileEncryptor.ViewModel
 
         private void OnSelectFileCommandExecuted(object p)
         {
-            if(!_UserDialog.OpenFile("Выбор файла для шифрования", out var file_path)) return;
+            if (!_UserDialog.OpenFile("Выбор файла для шифрования", out var file_path)) return;
             var selectedFile = new FileInfo(file_path);
             SelectedFile = selectedFile.Exists ? selectedFile : null;
             //SelectedFile = selectedFile ??= null;
@@ -117,6 +118,13 @@ namespace FileEncryptor.ViewModel
             var default_file_name = file.FullName + __EncryptedFileSuffix;
             if (!_UserDialog.SafeFile("Выбор файл для сохранения", out var destination_path, default_file_name)) return;
 
+            var timer = Stopwatch.StartNew();
+
+            _Encryptor.Encrypt(file.FullName, destination_path, Password);
+
+            timer.Stop();
+
+            _UserDialog.Information("Шифрование", $"Шифрование выполненно успешно за  {timer.Elapsed.TotalSeconds:0.##}с !!!");
 
         }
 
@@ -142,13 +150,22 @@ namespace FileEncryptor.ViewModel
 
         private void OnDecryptCommandExecuted(object p)
         {
-            if (!(p is FileInfo file)) return;
+            var file = p as FileInfo ?? SelectedFile;
+
+            if (file is null) return;
 
 
             var default_file_name = file.FullName.EndsWith(__EncryptedFileSuffix)
                 ? file.FullName.Substring(0, file.FullName.Length - __EncryptedFileSuffix.Length)
                 : file.FullName;
             if (!_UserDialog.SafeFile("Выбор файл для сохранения", out var destination_path, default_file_name)) return;
+            var timer = Stopwatch.StartNew();
+            var result = _Encryptor.Decrypt(file.FullName, destination_path, Password);
+            timer.Stop();
+            if (result)
+                _UserDialog.Information("Шифрование", $"Дешифровка выполненно успешно за  {timer.Elapsed.TotalSeconds:0.##}с !!");
+            else
+                _UserDialog.Information("Шифрование", "Ошибка при дешефровке Введен не верный пароль !");
 
         }
 

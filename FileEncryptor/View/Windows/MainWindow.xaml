@@ -80,7 +80,7 @@
             <TextBlock Grid.Column="0" Grid.Row="0" Text="Пароль:"></TextBlock>
             <TextBox 
                 Margin="5"
-                Grid.Column="1" Grid.Row="0" Text="123" 
+                Grid.Column="1" Grid.Row="0" Text="{Binding Password}" 
                 BorderThickness="0"></TextBox>
 
 

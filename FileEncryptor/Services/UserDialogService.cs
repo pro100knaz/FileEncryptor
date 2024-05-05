@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using FileEncryptor.Services.Interfaces;
 using Microsoft.Win32;
 
@@ -71,6 +72,21 @@ namespace FileEncryptor.Services
             SelectedFile = file_dialog.FileName;
 
             return true;
+        }
+
+        public void Information(string Title, string Message)
+        {
+            MessageBox.Show(Message, Title, MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        public void Warning(string Title, string Message)
+        {
+            MessageBox.Show(Message, Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+
+        public void Error(string Title, string Message)
+        {
+            MessageBox.Show(Message, Title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }
