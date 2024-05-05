@@ -152,7 +152,7 @@ namespace FileEncryptor.ViewModel
 
             ((Command)DecryptCommand).Executeable = false;
             ((Command)EncryptCommand).Executeable = false;
-            var encrypt_task = _Encryptor.EncryptAsync(file.FullName, destination_path, Password, Progress:progress, Cancel: ProcessCancelation.Token);
+            var encrypt_task = _Encryptor.EncryptAsync(file.FullName, destination_path, Password, Progress: progress, Cancel: ProcessCancelation.Token);
 
             bool result = true;
 
@@ -171,11 +171,15 @@ namespace FileEncryptor.ViewModel
                 ProcessCancelation = null;
             }
 
-           ((Command)EncryptCommand).Executeable = true;
-           
-           ((Command)DecryptCommand).Executeable = true;
-           if(result)
-           _UserDialog.Information("Шифрование", $"Шифрование выполненно успешно за  {timer.Elapsed.TotalSeconds:0.##}с !!!");
+            ((Command)EncryptCommand).Executeable = true;
+
+            ((Command)DecryptCommand).Executeable = true;
+            if (result)
+            {
+                _UserDialog.Information("Шифрование", $"Шифрование выполненно успешно за  {timer.Elapsed.TotalSeconds:0.##}с !!!");
+                Progress = default;
+
+            }
 
         }
 
@@ -220,14 +224,14 @@ namespace FileEncryptor.ViewModel
 
             ((Command)DecryptCommand).Executeable = false;
             ((Command)EncryptCommand).Executeable = false;
-            var decrypt_task = _Encryptor.DecryptAsync(file.FullName, destination_path, Password, Progress:progress, Cancel:ProcessCancelation.Token);
+            var decrypt_task = _Encryptor.DecryptAsync(file.FullName, destination_path, Password, Progress: progress, Cancel: ProcessCancelation.Token);
 
             var result = false;
             try
             {
-                 result = await decrypt_task;
+                result = await decrypt_task;
             }
-            catch (OperationCanceledException e) 
+            catch (OperationCanceledException e)
             {
 
             }
@@ -241,7 +245,10 @@ namespace FileEncryptor.ViewModel
 
             timer.Stop();
             if (result)
+            {
                 _UserDialog.Information("Шифрование", $"Дешифровка выполненно успешно за  {timer.Elapsed.TotalSeconds:0.##}с !!");
+                Progress = default;
+            }
             else
                 _UserDialog.Information("Шифрование", "Ошибка при дешефровке Введен не верный пароль !");
 
