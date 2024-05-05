@@ -1,6 +1,8 @@
 ﻿using System.Configuration;
 using System.Data;
 using System.Windows;
+using FileEncryptor.Services;
+using FileEncryptor.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -13,10 +15,12 @@ namespace FileEncryptor
 
         public static IHost Host => __Host ??= Program.CreateHostBuilder(Environment.GetCommandLineArgs()).Build();
 
-        public static void ConfigureServices(HostBuilderContext host, IServiceCollection services)
-        {
 
-        }
+        public static IServiceProvider Services => Host.Services;
+
+        public static void ConfigureServices(HostBuilderContext host, IServiceCollection services) => services
+            .AddServices()
+            .AddViewModels();
 
         protected override async void OnStartup(StartupEventArgs e)
         {
