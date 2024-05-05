@@ -9,10 +9,13 @@ namespace FileEncryptor.ViewModel
     internal class MainWindowViewModel : ViewModel
     {
 
+        #region Properties
+
+        
         #region string Title - "MainwINDOW tITLE"
 
         ///<summary> MainwINDOW tITLE </summary>
-        private string _Title = "dawda";
+        private string _Title = "FileEncryptor";
 
         ///<summary> MainwINDOW tITLE </summary>
         public string Title
@@ -20,6 +23,9 @@ namespace FileEncryptor.ViewModel
             get => _Title;
             set => SetField(ref _Title, value);
         }
+
+        #endregion
+
 
         #endregion
 

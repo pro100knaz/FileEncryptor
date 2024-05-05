@@ -21,13 +21,6 @@ namespace FileEncryptor
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             var host_builder = Host.CreateDefaultBuilder(args);
-            //host_builder.UseContentRoot(App.CurrentDirectory);
-            //host_builder.ConfigureAppConfiguration((host, cfg) =>
-            //{
-            //    cfg.SetBasePath(App.CurrentDirectory);
-            //    cfg.AddJsonFile("appsettings.json", optional: true,
-            //        reloadOnChange: true);
-            //});
             host_builder.ConfigureServices(App.ConfigureServices);
 
             return host_builder;
@@ -42,3 +35,13 @@ namespace FileEncryptor
         //                .SetBasePath(App.CurrentDirectory)
         //            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true))
         //        .ConfigureServices(App.ConfigureServices);
+
+
+
+            //host_builder.UseContentRoot(App.CurrentDirectory);
+            //host_builder.ConfigureAppConfiguration((host, cfg) =>
+            //{
+            //    cfg.SetBasePath(App.CurrentDirectory);
+            //    cfg.AddJsonFile("appsettings.json", optional: true,
+            //        reloadOnChange: true);
+            //});
