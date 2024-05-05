@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using FileEncryptor.Infrastructure.Commands;
 using FileEncryptor.Infrastructure.Commands.Base;
@@ -21,6 +22,19 @@ namespace FileEncryptor.ViewModel
 
         #region Properties
 
+        #region CancellationTokenSource ProcessCancelation - "Токены для отмены операции"
+
+        ///<summary> Токены для отмены операции </summary>
+        private CancellationTokenSource _ProcessCancelation;
+
+        ///<summary> Токены для отмены операции </summary>
+        public CancellationTokenSource ProcessCancelation
+        {
+            get => _ProcessCancelation;
+            set => SetField(ref _ProcessCancelation, value);
+        }
+
+        #endregion
 
         #region string Title - "MainwINDOW tITLE"
 
@@ -64,6 +78,20 @@ namespace FileEncryptor.ViewModel
 
         #endregion
 
+        #region double Progress - "Прогресс выполнения"
+
+        ///<summary> Прогресс выполнения </summary>
+        private double _Progress;
+
+        ///<summary> Прогресс выполнения </summary>
+        public double Progress
+        {
+            get => _Progress;
+            set => SetField(ref _Progress, value);
+        }
+
+        #endregion
+
 
         #endregion
 
@@ -101,14 +129,11 @@ namespace FileEncryptor.ViewModel
         #region Command EncryptCommand - Зашифровать Данные
         ///<summary> Зашифровать Данные </summary>
         private ICommand _EncryptCommand;
-
         ///<summary> Зашифровать Данные </summary>
         public ICommand EncryptCommand => _EncryptCommand ??=
                                     new LambdaCommand(OnEncryptCommandExecuted, CanEncryptCommandExecute);
-
         ///<summary>Проверка возможности выполнения - Зашифровать Данные </summary>
         private bool CanEncryptCommandExecute(object p) => (p is FileInfo file && file.Exists || SelectedFile != null) && !string.IsNullOrWhiteSpace(Password);
-
         ///<summary>Логика выполнения - Зашифровать Данные </summary>
         private async void OnEncryptCommandExecuted(object p)
         {
@@ -120,14 +145,37 @@ namespace FileEncryptor.ViewModel
             if (!_UserDialog.SafeFile("Выбор файл для сохранения", out var destination_path, default_file_name)) return;
 
             var timer = Stopwatch.StartNew();
+
+            ProcessCancelation = new CancellationTokenSource();
+
+            var progress = new Progress<double>(percent => Progress = percent);
+
             ((Command)DecryptCommand).Executeable = false;
             ((Command)EncryptCommand).Executeable = false;
-            var encrypt_task = _Encryptor.EncryptAsync(file.FullName, destination_path, Password);
+            var encrypt_task = _Encryptor.EncryptAsync(file.FullName, destination_path, Password, Progress:progress, Cancel: ProcessCancelation.Token);
 
-           await encrypt_task;
+            bool result = true;
+
+            try
+            {
+                await encrypt_task;
+            }
+            catch (OperationCanceledException e)
+            {
+                result = false;
+                _UserDialog.Warning("Шифрование", "Процесс дешифровки был приостановлен");
+            }
+            finally
+            {
+                ProcessCancelation.Dispose();
+                ProcessCancelation = null;
+            }
+
            ((Command)EncryptCommand).Executeable = true;
+           
            ((Command)DecryptCommand).Executeable = true;
-            _UserDialog.Information("Шифрование", $"Шифрование выполненно успешно за  {timer.Elapsed.TotalSeconds:0.##}с !!!");
+           if(result)
+           _UserDialog.Information("Шифрование", $"Шифрование выполненно успешно за  {timer.Elapsed.TotalSeconds:0.##}с !!!");
 
         }
 
@@ -164,13 +212,30 @@ namespace FileEncryptor.ViewModel
             if (!_UserDialog.SafeFile("Выбор файл для сохранения", out var destination_path, default_file_name)) return;
             var timer = Stopwatch.StartNew();
 
+            ProcessCancelation = new CancellationTokenSource();
+
+            var progress = new Progress<double>(percent => Progress = percent);
+
+
 
             ((Command)DecryptCommand).Executeable = false;
             ((Command)EncryptCommand).Executeable = false;
-            var decrypt_task = _Encryptor.DecryptAsync(file.FullName, destination_path, Password);
+            var decrypt_task = _Encryptor.DecryptAsync(file.FullName, destination_path, Password, Progress:progress, Cancel:ProcessCancelation.Token);
 
+            var result = false;
+            try
+            {
+                 result = await decrypt_task;
+            }
+            catch (OperationCanceledException e) 
+            {
 
-            var result = await decrypt_task;
+            }
+            finally
+            {
+                ProcessCancelation.Dispose();
+                ProcessCancelation = null;
+            }
             ((Command)DecryptCommand).Executeable = true;
             ((Command)EncryptCommand).Executeable = true;
 
@@ -183,6 +248,29 @@ namespace FileEncryptor.ViewModel
         }
 
         #endregion
+
+        #region Command CancelOperationCommand - Отмена Операции Выполнения Процесса ДЕШ/ШИФ
+
+        ///<summary> Отмена Операции Выполнения Процесса ДЕШ/ШИФ </summary>
+        private ICommand _CancelOperationCommand;
+
+        ///<summary> Отмена Операции Выполнения Процесса ДЕШ/ШИФ </summary>
+        public ICommand CancelOperationCommand => _CancelOperationCommand ??=
+            new LambdaCommand(OnCancelOperationCommandExecuted, CanCancelOperationCommandExecute);
+
+        ///<summary>Проверка возможности выполнения - Отмена Операции Выполнения Процесса ДЕШ/ШИФ </summary>
+        private bool CanCancelOperationCommandExecute(object p) => ProcessCancelation != null && !ProcessCancelation.IsCancellationRequested;
+
+        ///<summary>Логика выполнения - Отмена Операции Выполнения Процесса ДЕШ/ШИФ </summary>
+        private void OnCancelOperationCommandExecuted(object p)
+        {
+            ProcessCancelation.Cancel();
+            Progress = default;
+        }
+
+        #endregion
+
+
 
 
         #endregion

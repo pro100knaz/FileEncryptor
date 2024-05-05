@@ -15,12 +15,36 @@
             </MenuItem>
             <MenuItem/>
         </Menu>
-        <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem DockPanel.Dock="Right">
-                <ResizeGrip />
-            </StatusBarItem>
-            <StatusBarItem Content="Готово">
-            </StatusBarItem>
+                <StatusBar DockPanel.Dock="Bottom">
+                    <StatusBarItem DockPanel.Dock="Right">
+                        <ResizeGrip/>
+                    </StatusBarItem>
+
+                    <StatusBarItem DockPanel.Dock="Right">
+                        <DockPanel>
+                            <DockPanel.Style>
+                        <Style TargetType="DockPanel">
+
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Progress}" Value="0">
+                                    <Setter Property="Visibility" Value="Hidden"></Setter>
+                                </DataTrigger>
+
+
+                                <DataTrigger Binding="{Binding Progress}" Value="1">
+                                    <Setter Property="Visibility" Value="Hidden"></Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                            </DockPanel.Style>
+                            <TextBlock Text="{Binding Progress, StringFormat=p1}" MinWidth="30" TextAlignment="Right"
+                                       DockPanel.Dock="Right"/>
+                            <ProgressBar Width="120" Height="10" 
+                                         Maximum="1" Value="{Binding Progress}" 
+                                         DockPanel.Dock="Right"/>
+                        </DockPanel>
+                    </StatusBarItem>
+            <StatusBarItem/>
         </StatusBar>
 
         <TabControl DockPanel.Dock="Top">
@@ -111,8 +135,9 @@
                 <Button Content="Зашифровать" Margin="5" Padding="30,10" 
                         Command="{Binding EncryptCommand}"/>
                 <Button Content="Расшифровать" Margin="5" Padding="30,10" 
-                        
                         Command="{Binding DecryptCommand}"/>
+                <Button Content="Отменить" Margin="5" Padding="30,10"
+                        Command="{Binding CancelOperationCommand}"/>
             </UniformGrid>
 
         </Grid>

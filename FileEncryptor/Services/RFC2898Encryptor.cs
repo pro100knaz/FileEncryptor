@@ -114,6 +114,7 @@ namespace FileEncryptor.Services
                 await using var source = File.OpenRead(SourcePath);
 
                 var file_length = source.Length;
+                var last_percent = 0.0;
 
                 var buffer = new byte[BufferLength];
                 int readed;
@@ -125,9 +126,13 @@ namespace FileEncryptor.Services
                     //дополнительные действия по завершению асинхронной операции
                     await destination.WriteAsync(buffer, 0, readed).ConfigureAwait(false);
 
-                    var current_position = source.Position;
+                    var current_percent = (double)source.Position / file_length;
 
-                    Progress?.Report((double)current_position/file_length);
+                    if (current_percent - last_percent >= 0.001)
+                    {
+                        Progress?.Report(current_percent);
+                        last_percent = current_percent;
+                    }
 
                     if (Cancel.IsCancellationRequested)
                     {
@@ -171,22 +176,29 @@ namespace FileEncryptor.Services
             {
                 await using var destination_decrypted = File.Create(DestinationPath, BufferLength);
                 await using var destination = new CryptoStream(destination_decrypted, decryptor, CryptoStreamMode.Write);
-                await using var encrypted_source = File.OpenRead(SourcePath);
+                await using var decrypted_source = File.OpenRead(SourcePath);
 
-                    var file_length = encrypted_source.Length;
+                var file_length = decrypted_source.Length;
+                var last_percent = 0.0;
+
 
                 var buffer = new byte[BufferLength];
                 int readed;
                 do
                 {
-                    readed = await encrypted_source.ReadAsync(buffer, 0, BufferLength).ConfigureAwait(false);
+                    readed = await decrypted_source.ReadAsync(buffer, 0, BufferLength).ConfigureAwait(false);
 
                     await destination.WriteAsync(buffer, 0, readed).ConfigureAwait(false);
 
                     Cancel.ThrowIfCancellationRequested();
 
-                    var current_position = encrypted_source.Position;
-                    Progress?.Report((double)current_position / file_length);
+                    var current_percent = (double)decrypted_source.Position / file_length;
+
+                    if (current_percent - last_percent >= 0.001)
+                    {
+                      Progress?.Report(current_percent);
+                      last_percent = current_percent;
+                    }
 
                     Thread.Sleep(1);
                 }
