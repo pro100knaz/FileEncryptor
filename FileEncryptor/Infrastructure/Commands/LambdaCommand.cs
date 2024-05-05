@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FileEncryptor.Infrastructure.Commands.Base;
 
-namespace FileEncryptor.Infrastructure.Command
+namespace FileEncryptor.Infrastructure.Commands
 {
     internal class LambdaCommand : Command
     {
