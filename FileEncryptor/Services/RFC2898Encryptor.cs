@@ -208,18 +208,18 @@ namespace FileEncryptor.Services
                 {
                     destination.FlushFinalBlock();
                 }
-                catch (CryptographicException)
+                catch (CryptographicException e)
                 {
                     return false;
                 }
 
-                return true;
             }
             catch (OperationCanceledException e)
             {
                 File.Delete(DestinationPath);
                 throw;
             }
+            return true;
         }
     }
 }

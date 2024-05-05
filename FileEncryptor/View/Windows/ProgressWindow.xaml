@@ -5,15 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FileEncryptor.View.Windows"
         mc:Ignorable="d"
-        Title="ProgressBar" Height="165" Width="565">
-    <Grid Margin="5">
+        Title="ProgressBar" Height="170" Width="495">
+    <Grid Margin="5" DataContext="{Binding RelativeSource= {RelativeSource AncestorType=local:ProgressWindow}}">
 
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock  Grid.Row="0" Text="Статус" Margin="5,20"/>
+        <TextBlock  Grid.Row="0" Text="{Binding Status }" Margin="5,20"/>
 
         <Grid Row="1" Margin="10,0,10,10">
 
@@ -23,13 +23,13 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <ProgressBar Grid.Column="0" VerticalAlignment="Center" 
+            <ProgressBar Grid.Column="0" 
+                         x:Name="ProgressView"
+                         VerticalAlignment="Center" 
                          Height="20"
-                         IsIndeterminate="True"/>
-            <TextBlock Grid.Column="1" Text="100" Margin="10,0,10,0"
-                       MinWidth="40"
-                       VerticalAlignment="Center" HorizontalAlignment="Right"/>
-            <Button Grid.Column="2" Content="Cancel" Padding="30,10" Background="WhiteSmoke"/>
+                         Maximum="1"/>
+            <TextBlock Grid.Column="1" Text="{Binding ProgressValue, StringFormat=p1}" Margin="10,0" VerticalAlignment="Center" TextAlignment="Right" MinWidth="40"/>
+            <Button Grid.Column="2" Name="CancelButton" Content="Cancel" Padding="30,10" Background="WhiteSmoke" IsEnabled="False" Click="OnCancelClick"/>
         </Grid >
     </Grid>
 </Window>

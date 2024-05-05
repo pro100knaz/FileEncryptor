@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using FileEncryptor.Services.Interfaces;
+using FileEncryptor.View.Windows;
 using Microsoft.Win32;
 
 namespace FileEncryptor.Services
@@ -88,5 +89,22 @@ namespace FileEncryptor.Services
         {
             MessageBox.Show(Message, Title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
+
+        public (IProgress<double> Progress, IProgress<string> Status, CancellationToken Cancel, Action Close) ShowProgress(string Title)
+        {
+            var progress_wondow = new ProgressWindow()
+            {
+                Title = Title,
+                Owner = App.FocusedWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+
+            progress_wondow.Show();
+
+            return (progress_wondow.ProgressInformer, progress_wondow.StatusInformer, progress_wondow.Cancel,
+                progress_wondow.Close);
+
+        }
+
     }
 }

@@ -150,9 +150,18 @@ namespace FileEncryptor.ViewModel
 
             var progress = new Progress<double>(percent => Progress = percent);
 
+            var (progress_info, status_info, operation_cancel, close_window) = _UserDialog.ShowProgress("Шифрование");
+
+            var cancel = ProcessCancelation.Token;
+            var combyne_cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancel, operation_cancel);
+
+            status_info.Report($"Дешифрование файла: {file.Name}");
+
+
+
             ((Command)DecryptCommand).Executeable = false;
             ((Command)EncryptCommand).Executeable = false;
-            var encrypt_task = _Encryptor.EncryptAsync(file.FullName, destination_path, Password, Progress: progress, Cancel: ProcessCancelation.Token);
+            var encrypt_task = _Encryptor.EncryptAsync(file.FullName, destination_path, Password, Progress: progress_info, Cancel: combyne_cancellation.Token);
 
             bool result = true;
 
@@ -160,15 +169,16 @@ namespace FileEncryptor.ViewModel
             {
                 await encrypt_task;
             }
-            catch (OperationCanceledException e)
+            catch (OperationCanceledException e) when (e.CancellationToken == combyne_cancellation.Token)
             {
                 result = false;
-                _UserDialog.Warning("Шифрование", "Процесс дешифровки был приостановлен");
+               // _UserDialog.Warning("Шифрование", "Процесс дешифровки был приостановлен");
             }
             finally
             {
                 ProcessCancelation.Dispose();
                 ProcessCancelation = null;
+                close_window();
             }
 
             ((Command)EncryptCommand).Executeable = true;
@@ -213,18 +223,29 @@ namespace FileEncryptor.ViewModel
             var default_file_name = file.FullName.EndsWith(__EncryptedFileSuffix)
                 ? file.FullName.Substring(0, file.FullName.Length - __EncryptedFileSuffix.Length)
                 : file.FullName;
+
+
+
             if (!_UserDialog.SafeFile("Выбор файл для сохранения", out var destination_path, default_file_name)) return;
+
+
             var timer = Stopwatch.StartNew();
 
-            ProcessCancelation = new CancellationTokenSource();
-
             var progress = new Progress<double>(percent => Progress = percent);
+            var (progress_info, status_info, operation_cancel, close_window) = _UserDialog.ShowProgress("Шифрование");
+            status_info.Report($"Шифрование файла: {file.Name}");
+
+
+            ProcessCancelation = new CancellationTokenSource();
+            var cancel = ProcessCancelation.Token;
+            var combyne_cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancel, operation_cancel);
+
 
 
 
             ((Command)DecryptCommand).Executeable = false;
             ((Command)EncryptCommand).Executeable = false;
-            var decrypt_task = _Encryptor.DecryptAsync(file.FullName, destination_path, Password, Progress: progress, Cancel: ProcessCancelation.Token);
+            var decrypt_task = _Encryptor.DecryptAsync(file.FullName, destination_path, Password, Progress: progress_info, Cancel: combyne_cancellation.Token);
 
             var result = false;
             try
@@ -239,6 +260,7 @@ namespace FileEncryptor.ViewModel
             {
                 ProcessCancelation.Dispose();
                 ProcessCancelation = null;
+                close_window();
             }
             ((Command)DecryptCommand).Executeable = true;
             ((Command)EncryptCommand).Executeable = true;

@@ -16,5 +16,9 @@ namespace FileEncryptor.Services.Interfaces
         void Information(string Title , string Message);
         void Warning(string Title , string Message);
         void Error(string Title , string Message);
+
+        (IProgress<double> Progress, IProgress<string> Status, CancellationToken Cancel, Action Close) ShowProgress(
+            string Title);
+
     }
 }
