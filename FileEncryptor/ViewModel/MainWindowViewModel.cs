@@ -74,7 +74,7 @@ namespace FileEncryptor.ViewModel
 
         ///<summary> Команда выбора файла </summary>
 
-        public ICommand SelectFileCommand => _SelectFileCommand ??
+        public ICommand SelectFileCommand => _SelectFileCommand ??=
                                     new LambdaCommand(OnSelectFileCommandExecuted, CanSelectFileCommandExecute);
 
         ///<summary>Проверка возможности выполнения - Команда выбора файла </summary>
@@ -89,6 +89,53 @@ namespace FileEncryptor.ViewModel
             var selectedFile = new FileInfo(file_path);
             SelectedFile = selectedFile.Exists ? selectedFile : null;
             //SelectedFile = selectedFile ??= null;
+        }
+
+        #endregion
+
+        #region Command EncryptCommand - Зашифровать Данные
+
+
+        ///<summary> Зашифровать Данные </summary>
+        private ICommand _EncryptCommand;
+
+        ///<summary> Зашифровать Данные </summary>
+        public ICommand EncryptCommand => _EncryptCommand ??=
+                                    new LambdaCommand(OnEncryptCommandExecuted, CanEncryptCommandExecute);
+
+        ///<summary>Проверка возможности выполнения - Зашифровать Данные </summary>
+        private bool CanEncryptCommandExecute(object p) => (p is FileInfo file && file.Exists || SelectedFile != null) && !string.IsNullOrWhiteSpace(Password);
+
+        ///<summary>Логика выполнения - Зашифровать Данные </summary>
+        private void OnEncryptCommandExecuted(object p)
+        {
+            var file = p as FileInfo ?? SelectedFile;
+            if (file == null) return;
+        }
+
+        #endregion
+
+        #region Command DecryptCommand - Разшифровать
+
+
+        ///<summary> Разшифровать </summary>
+
+        private ICommand _DecryptCommand;
+
+        ///<summary> Разшифровать </summary>
+
+        public ICommand DecryptCommand => _DecryptCommand ??=
+                                    new LambdaCommand(OnDecryptCommandExecuted, CanDecryptCommandExecute);
+
+        ///<summary>Проверка возможности выполнения - Разшифровать </summary>
+
+        private bool CanDecryptCommandExecute(object p) => (p is FileInfo file && file.Exists || SelectedFile != null) && !string.IsNullOrWhiteSpace(Password);
+
+        ///<summary>Логика выполнения - Разшифровать </summary>
+
+        private void OnDecryptCommandExecuted(object p)
+        {
+            if (!(p is FileInfo file)) return;
         }
 
         #endregion
