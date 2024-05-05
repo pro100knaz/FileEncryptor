@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using FileEncryptor.Infrastructure.Commands;
+using FileEncryptor.Infrastructure.Commands.Base;
 using FileEncryptor.Services.Interfaces;
 
 namespace FileEncryptor.ViewModel
@@ -109,7 +110,7 @@ namespace FileEncryptor.ViewModel
         private bool CanEncryptCommandExecute(object p) => (p is FileInfo file && file.Exists || SelectedFile != null) && !string.IsNullOrWhiteSpace(Password);
 
         ///<summary>Логика выполнения - Зашифровать Данные </summary>
-        private void OnEncryptCommandExecuted(object p)
+        private async void OnEncryptCommandExecuted(object p)
         {
             var file = p as FileInfo ?? SelectedFile;
             if (file == null) return;
@@ -119,11 +120,13 @@ namespace FileEncryptor.ViewModel
             if (!_UserDialog.SafeFile("Выбор файл для сохранения", out var destination_path, default_file_name)) return;
 
             var timer = Stopwatch.StartNew();
+            ((Command)DecryptCommand).Executeable = false;
+            ((Command)EncryptCommand).Executeable = false;
+            var encrypt_task = _Encryptor.EncryptAsync(file.FullName, destination_path, Password);
 
-            _Encryptor.Encrypt(file.FullName, destination_path, Password);
-
-            timer.Stop();
-
+           await encrypt_task;
+           ((Command)EncryptCommand).Executeable = true;
+           ((Command)DecryptCommand).Executeable = true;
             _UserDialog.Information("Шифрование", $"Шифрование выполненно успешно за  {timer.Elapsed.TotalSeconds:0.##}с !!!");
 
         }
@@ -148,7 +151,7 @@ namespace FileEncryptor.ViewModel
 
         ///<summary>Логика выполнения - Разшифровать </summary>
 
-        private void OnDecryptCommandExecuted(object p)
+        private async void OnDecryptCommandExecuted(object p)
         {
             var file = p as FileInfo ?? SelectedFile;
 
@@ -160,7 +163,17 @@ namespace FileEncryptor.ViewModel
                 : file.FullName;
             if (!_UserDialog.SafeFile("Выбор файл для сохранения", out var destination_path, default_file_name)) return;
             var timer = Stopwatch.StartNew();
-            var result = _Encryptor.Decrypt(file.FullName, destination_path, Password);
+
+
+            ((Command)DecryptCommand).Executeable = false;
+            ((Command)EncryptCommand).Executeable = false;
+            var decrypt_task = _Encryptor.DecryptAsync(file.FullName, destination_path, Password);
+
+
+            var result = await decrypt_task;
+            ((Command)DecryptCommand).Executeable = true;
+            ((Command)EncryptCommand).Executeable = true;
+
             timer.Stop();
             if (result)
                 _UserDialog.Information("Шифрование", $"Дешифровка выполненно успешно за  {timer.Elapsed.TotalSeconds:0.##}с !!");
