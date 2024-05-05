@@ -11,9 +11,9 @@ namespace FileEncryptor.Services.Interfaces
         void Encrypt(string SiurcePath, string DestinationPath, string Password, int BufferLength = 104200);
         bool Decrypt(string SiurcePath, string DestinationPath, string Password, int BufferLength = 104200);
 
-        Task EncryptAsync(string SourcePath, string DestinationPath, string Password, int BufferLength = 104200);
+        Task EncryptAsync(string SourcePath, string DestinationPath, string Password, int BufferLength = 104200, IProgress<double> Progress = null, CancellationToken Cancel = default);
 
-        Task<bool> DecryptAsync(string SiurcePath, string DestinationPath, string Password, int BufferLength = 104200);
+        Task<bool> DecryptAsync(string SiurcePath, string DestinationPath, string Password, int BufferLength = 104200, IProgress<double> Progress = null, CancellationToken Cancel = default);
 
     }
 }

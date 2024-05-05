@@ -90,7 +90,16 @@ namespace FileEncryptor.Services
             return true;
         }
 
-        public async Task EncryptAsync(string SourcePath, string DestinationPath, string Password, int BufferLength = 104200)
+
+
+
+        public async Task EncryptAsync(
+            string SourcePath,
+            string DestinationPath,
+            string Password,
+            int BufferLength = 104200,
+            IProgress<double> Progress = null,  //тип данных который нужно возвращать
+            CancellationToken Cancel = default)
         {
 
             if (!File.Exists(SourcePath)) throw new FileNotFoundException("fILE NOT FOUND");
@@ -98,26 +107,58 @@ namespace FileEncryptor.Services
                 throw new ArgumentOutOfRangeException(nameof(BufferLength), BufferLength, "Маленький размер");
 
             var encryptor = GetEncryptor(Password/*, Encoding.UTF8.GetBytes(SourcePath)*/);
-            await using var destination_encrypted = File.Create(DestinationPath, BufferLength);
-            await using var destination = new CryptoStream(destination_encrypted, encryptor, CryptoStreamMode.Write); //поток для шифровки
-            await using var source = File.OpenRead(SourcePath);
-
-            var buffer = new byte[BufferLength];
-            int readed;
-            do
+            try
             {
+                await using var destination_encrypted = File.Create(DestinationPath, BufferLength);
+                await using var destination = new CryptoStream(destination_encrypted, encryptor, CryptoStreamMode.Write); //поток для шифровки
+                await using var source = File.OpenRead(SourcePath);
 
-                readed = await source.ReadAsync(buffer, 0, BufferLength).ConfigureAwait(false);
-                //ConfigureAwait(false)- выделяет другой поток в пулле потоков в результате делая пользователььский интерфейс быстрее
-                //дополнительные действия по завершению асинхронной операции
-                await destination.WriteAsync(buffer, 0, readed).ConfigureAwait(false);
-                Thread.Sleep(1);
+                var file_length = source.Length;
+
+                var buffer = new byte[BufferLength];
+                int readed;
+                do
+                {
+
+                    readed = await source.ReadAsync(buffer, 0, BufferLength).ConfigureAwait(false);
+                    //ConfigureAwait(false)- выделяет другой поток в пулле потоков в результате делая пользователььский интерфейс быстрее
+                    //дополнительные действия по завершению асинхронной операции
+                    await destination.WriteAsync(buffer, 0, readed).ConfigureAwait(false);
+
+                    var current_position = source.Position;
+
+                    Progress?.Report((double)current_position/file_length);
+
+                    if (Cancel.IsCancellationRequested)
+                    {
+                        //ОЧИСТОЧКА ОПЕРАЦИИ
+                        Cancel.ThrowIfCancellationRequested();
+                    }
+
+                    Thread.Sleep(1);
+                }
+                while (readed > 0);
+                destination.FlushFinalBlock();
+
+                Progress?.Report(1);
+
             }
-            while (readed > 0);
-            destination.FlushFinalBlock();
+            catch (OperationCanceledException e)
+            {
+                File.Delete(DestinationPath);
+                throw;
+            }
         }
 
-        public async Task<bool> DecryptAsync(string SourcePath, string DestinationPath, string Password, int BufferLength = 104200)
+
+
+
+        public async Task<bool> DecryptAsync(string SourcePath,
+            string DestinationPath,
+            string Password,
+            int BufferLength = 104200,
+             IProgress<double> Progress = null,  //тип данных который нужно возвращать
+            CancellationToken Cancel = default)
         {
             if (!File.Exists(SourcePath)) throw new FileNotFoundException("fILE NOT FOUND");
             if (BufferLength <= 0)
@@ -125,32 +166,48 @@ namespace FileEncryptor.Services
 
             var decryptor = GetDecryptor(Password);
 
-                await using var destination_decrypted = File.Create(DestinationPath, BufferLength);
-            await using var destination = new CryptoStream(destination_decrypted, decryptor, CryptoStreamMode.Write);
-            await using var encrypted_source = File.OpenRead(SourcePath);
-
-            var buffer = new byte[BufferLength];
-            int readed;
-            do
-            {
-                readed = await encrypted_source.ReadAsync(buffer, 0, BufferLength).ConfigureAwait(false);
-
-                await destination.WriteAsync(buffer, 0, readed).ConfigureAwait(false);
-
-                Thread.Sleep(1);
-            }
-            while (readed > 0);
 
             try
             {
-                destination.FlushFinalBlock();
-            }
-            catch (CryptographicException)
-            {
-                return false;
-            }
+                await using var destination_decrypted = File.Create(DestinationPath, BufferLength);
+                await using var destination = new CryptoStream(destination_decrypted, decryptor, CryptoStreamMode.Write);
+                await using var encrypted_source = File.OpenRead(SourcePath);
 
-            return true;
+                    var file_length = encrypted_source.Length;
+
+                var buffer = new byte[BufferLength];
+                int readed;
+                do
+                {
+                    readed = await encrypted_source.ReadAsync(buffer, 0, BufferLength).ConfigureAwait(false);
+
+                    await destination.WriteAsync(buffer, 0, readed).ConfigureAwait(false);
+
+                    Cancel.ThrowIfCancellationRequested();
+
+                    var current_position = encrypted_source.Position;
+                    Progress?.Report((double)current_position / file_length);
+
+                    Thread.Sleep(1);
+                }
+                while (readed > 0);
+
+                try
+                {
+                    destination.FlushFinalBlock();
+                }
+                catch (CryptographicException)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            catch (OperationCanceledException e)
+            {
+                File.Delete(DestinationPath);
+                throw;
+            }
         }
     }
 }
