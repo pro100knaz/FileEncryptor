@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace FileEncryptor.Infrastructure.Command
+namespace FileEncryptor.Infrastructure.Commands.Base
 {
-    abstract class Command : ICommand
+    public abstract class Command : ICommand
     {
         public event EventHandler? CanExecuteChanged
         {
@@ -16,7 +16,7 @@ namespace FileEncryptor.Infrastructure.Command
         }
 
 
-        private bool _Executeable;
+        private bool _Executeable = true;
 
         public bool Executeable
         {
@@ -29,7 +29,7 @@ namespace FileEncryptor.Infrastructure.Command
             }
         }
 
-        bool ICommand.CanExecute(object parameter) => CanExecute(parameter);
+        bool ICommand.CanExecute(object parameter) => _Executeable && CanExecute(parameter);
 
         void ICommand.Execute(object parameter)
         {
@@ -39,7 +39,7 @@ namespace FileEncryptor.Infrastructure.Command
 
         protected virtual bool CanExecute(object parameter) => true;
 
-        protected abstract void Execute(object parametr);
+        protected abstract void Execute(object parameter);
 
     }
 }
